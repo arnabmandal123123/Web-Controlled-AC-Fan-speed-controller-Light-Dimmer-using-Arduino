@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arduino AC Controller</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* A modern, clean font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            touch-action: manipulation; /* Prevents double-tap zoom on mobile */
+        }
+        /* A subtle press effect for buttons */
+        .btn:active {
+            transform: scale(0.96);
+            filter: brightness(0.9);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen">
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg text-center w-full max-w-md mx-4">
+        
+        <!-- Header -->
+        <h1 class="text-3xl font-bold mb-2 text-gray-800 dark:text-cyan-400">Light Bulb Controller</h1>
+        <p class="text-gray-500 dark:text-gray-400 mb-6">Select a power mode.</p>
+        
+        <!-- Status Display -->
+        <div class="bg-gray-200 dark:bg-gray-700 text-lg py-3 px-4 rounded-lg mb-8">
+            <span class="text-gray-600 dark:text-gray-300">Current Mode:</span>
+            <span id="mode-text" class="font-bold text-yellow-600 dark:text-yellow-400">OFF</span>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <button onclick="setMode('on', 'FULL POWER')" class="btn w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-lg text-xl shadow-md transition-all duration-200">
+                ON
+            </button>
+            <button onclick="setMode('half', 'HALF POWER')" class="btn w-full bg-blue-500 hover:blue-600 text-white font-bold py-4 px-6 rounded-lg text-xl shadow-md transition-all duration-200">
+                HALF
+            </button>
+            <button onclick="setMode('off', 'OFF')" class="btn w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-lg text-xl shadow-md transition-all duration-200">
+                OFF
+            </button>
+        </div>
+
+        <!-- Message Area for feedback -->
+        <p id="message" class="text-gray-500 dark:text-gray-500 mt-6 h-6"></p>
+    </div>
+
+    <script>
+        const statusText = document.getElementById('mode-text');
+        const messageText = document.getElementById('message');
+
+        function setMode(mode, modeName) {
+            messageText.textContent = 'Sending...';
+            // Send request to the Python server at the /control/<mode> endpoint
+            fetch(`/control/${mode}`)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Network response was not ok.');
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        statusText.textContent = modeName;
+                        messageText.textContent = 'Command successful!';
+                    } else {
+                        throw new Error(data.message || 'Failed to send command.');
+                    }
+                })
+                .catch(error => {
+                    messageText.textContent = 'Error: Connection failed.';
+                    console.error('Fetch error:', error);
+                })
+                .finally(() => {
+                    // Clear the message after 2 seconds
+                    setTimeout(() => { messageText.textContent = ''; }, 2000);
+                });
+        }
+    </script>
+</body>
+</html>
+
