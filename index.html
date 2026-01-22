@@ -3,60 +3,350 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arduino AC Controller</title>
-    <!-- Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>AC Controller - Material Design</title>
+    
+    <!-- Google Fonts - Roboto -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
     <style>
-        /* A modern, clean font */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            touch-action: manipulation; /* Prevents double-tap zoom on mobile */
+        :root {
+            --google-blue: #4285f4;
+            --google-red: #ea4335;
+            --google-yellow: #fbbc04;
+            --google-green: #34a853;
+            --surface: #ffffff;
+            --on-surface: #202124;
+            --surface-variant: #f1f3f4;
+            --shadow: rgba(0, 0, 0, 0.12);
+            --shadow-heavy: rgba(0, 0, 0, 0.24);
         }
-        /* A subtle press effect for buttons */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f1f3f4 0%, #e8eaed 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--on-surface);
+        }
+
+        .container {
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 1px 2px 0 var(--shadow), 0 2px 6px 2px var(--shadow);
+            max-width: 480px;
+            width: 100%;
+            padding: 32px;
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 400;
+            color: var(--on-surface);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header h1 .material-icons {
+            font-size: 36px;
+            color: var(--google-blue);
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #5f6368;
+            font-weight: 400;
+        }
+
+        .status-card {
+            background: var(--surface-variant);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 32px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .status-card:hover {
+            box-shadow: 0 1px 3px 0 var(--shadow), 0 4px 8px 3px var(--shadow);
+        }
+
+        .status-label {
+            font-size: 14px;
+            color: #5f6368;
+            margin-bottom: 8px;
+            font-weight: 500;
+            letter-spacing: 0.25px;
+        }
+
+        .status-value {
+            font-size: 28px;
+            font-weight: 500;
+            color: var(--on-surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .status-value.off { color: #5f6368; }
+        .status-value.on { color: var(--google-green); }
+        .status-value.half { color: var(--google-blue); }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            position: relative;
+            overflow: hidden;
+            border: none;
+            border-radius: 12px;
+            padding: 20px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 2px 0 var(--shadow), 0 1px 3px 1px var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .btn .material-icons {
+            font-size: 32px;
+        }
+
+        .btn:hover {
+            box-shadow: 0 1px 3px 0 var(--shadow), 0 4px 8px 3px var(--shadow);
+            transform: translateY(-2px);
+        }
+
         .btn:active {
             transform: scale(0.96);
-            filter: brightness(0.9);
+        }
+
+        .btn-on {
+            background: linear-gradient(135deg, var(--google-green) 0%, #2d8e47 100%);
+        }
+
+        .btn-half {
+            background: linear-gradient(135deg, var(--google-blue) 0%, #3367d6 100%);
+        }
+
+        .btn-off {
+            background: linear-gradient(135deg, var(--google-red) 0%, #d33b29 100%);
+        }
+
+        /* Ripple effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0);
+            animation: ripple-animation 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .message {
+            text-align: center;
+            min-height: 24px;
+            font-size: 14px;
+            color: #5f6368;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message.success {
+            color: var(--google-green);
+        }
+
+        .message.error {
+            color: var(--google-red);
+        }
+
+        .message .material-icons {
+            font-size: 18px;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 2px solid var(--surface-variant);
+            border-top: 2px solid var(--google-blue);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .container {
+                padding: 24px;
+            }
+            
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen">
-    <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg text-center w-full max-w-md mx-4">
-        
+<body>
+    <div class="container">
         <!-- Header -->
-        <h1 class="text-3xl font-bold mb-2 text-gray-800 dark:text-cyan-400">Light Bulb Controller</h1>
-        <p class="text-gray-500 dark:text-gray-400 mb-6">Select a power mode.</p>
+        <div class="header">
+            <h1>
+                <span class="material-icons">power_settings_new</span>
+                AC Controller
+            </h1>
+            <p>Control your device remotely</p>
+        </div>
         
         <!-- Status Display -->
-        <div class="bg-gray-200 dark:bg-gray-700 text-lg py-3 px-4 rounded-lg mb-8">
-            <span class="text-gray-600 dark:text-gray-300">Current Mode:</span>
-            <span id="mode-text" class="font-bold text-yellow-600 dark:text-yellow-400">OFF</span>
+        <div class="status-card">
+            <div class="status-label">CURRENT MODE</div>
+            <div id="mode-text" class="status-value off">
+                <span class="material-icons">power_off</span>
+                OFF
+            </div>
         </div>
 
         <!-- Control Buttons -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <button onclick="setMode('on', 'FULL POWER')" class="btn w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-lg text-xl shadow-md transition-all duration-200">
-                ON
+        <div class="controls">
+            <button onclick="setMode('on', 'FULL POWER')" class="btn btn-on">
+                <span class="material-icons">bolt</span>
+                <span>ON</span>
             </button>
-            <button onclick="setMode('half', 'HALF POWER')" class="btn w-full bg-blue-500 hover:blue-600 text-white font-bold py-4 px-6 rounded-lg text-xl shadow-md transition-all duration-200">
-                HALF
+            <button onclick="setMode('half', 'HALF POWER')" class="btn btn-half">
+                <span class="material-icons">adjust</span>
+                <span>HALF</span>
             </button>
-            <button onclick="setMode('off', 'OFF')" class="btn w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-lg text-xl shadow-md transition-all duration-200">
-                OFF
+            <button onclick="setMode('off', 'OFF')" class="btn btn-off">
+                <span class="material-icons">power_off</span>
+                <span>OFF</span>
             </button>
         </div>
 
         <!-- Message Area for feedback -->
-        <p id="message" class="text-gray-500 dark:text-gray-500 mt-6 h-6"></p>
+        <div id="message" class="message"></div>
     </div>
 
     <script>
         const statusText = document.getElementById('mode-text');
-        const messageText = document.getElementById('message');
+        const messageEl = document.getElementById('message');
+
+        // Ripple effect
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        function updateStatus(mode, modeName) {
+            statusText.className = 'status-value ' + mode;
+            let icon = 'power_off';
+            if (mode === 'on') icon = 'bolt';
+            else if (mode === 'half') icon = 'adjust';
+            
+            statusText.innerHTML = `
+                <span class="material-icons">${icon}</span>
+                ${modeName}
+            `;
+        }
+
+        function showMessage(text, type = '') {
+            messageEl.className = 'message ' + type;
+            if (type === 'loading') {
+                messageEl.innerHTML = `<div class="spinner"></div><span>${text}</span>`;
+            } else if (type === 'success') {
+                messageEl.innerHTML = `<span class="material-icons">check_circle</span><span>${text}</span>`;
+            } else if (type === 'error') {
+                messageEl.innerHTML = `<span class="material-icons">error</span><span>${text}</span>`;
+            } else {
+                messageEl.textContent = text;
+            }
+        }
 
         function setMode(mode, modeName) {
-            messageText.textContent = 'Sending...';
-            // Send request to the Python server at the /control/<mode> endpoint
+            showMessage('Sending command...', 'loading');
+            
             fetch(`/control/${mode}`)
                 .then(response => {
                     if (response.ok) {
@@ -66,19 +356,21 @@
                 })
                 .then(data => {
                     if (data.status === 'success') {
-                        statusText.textContent = modeName;
-                        messageText.textContent = 'Command successful!';
+                        updateStatus(mode, modeName);
+                        showMessage('Command successful!', 'success');
                     } else {
                         throw new Error(data.message || 'Failed to send command.');
                     }
                 })
                 .catch(error => {
-                    messageText.textContent = 'Error: Connection failed.';
+                    showMessage('Connection failed', 'error');
                     console.error('Fetch error:', error);
                 })
                 .finally(() => {
-                    // Clear the message after 2 seconds
-                    setTimeout(() => { messageText.textContent = ''; }, 2000);
+                    setTimeout(() => { 
+                        messageEl.className = 'message';
+                        messageEl.textContent = ''; 
+                    }, 3000);
                 });
         }
     </script>
